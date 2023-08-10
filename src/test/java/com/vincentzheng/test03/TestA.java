@@ -3,8 +3,12 @@ package com.vincentzheng.test03;
 import com.vincentzheng.test03.annotation.OnAction;
 import com.vincentzheng.test03.annotation.OnEvent;
 import com.vincentzheng.test03.annotation.WithStateMachine;
+import com.vincentzheng.test03.event.OnActionEventListenerFactory;
+import com.vincentzheng.test03.support.EventBasedStateMachine;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,13 +20,39 @@ import org.springframework.stereotype.Component;
 public class TestA {
 
     public static void main(String[] args) {
-        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(TestConfiguration.class);
+//        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(TestConfiguration.class);
+//
+//        StateMachine machine = applicationContext.getBean(StateMachine.class);
+//        // Solution A
+////        ConfigurableListableBeanFactory beanFactory = applicationContext.getBeanFactory();
+////        beanFactory.getBeansWithAnnotation(WithStateMachine.class)
+////                .values().forEach(beanFactory::autowireBean);
+//        machine.fire("xx", "zhangsan");
 
-        StateMachine machine = applicationContext.getBean(StateMachine.class);
-        machine.fire("xx","zhangsan");
+        // Solution C
+        executeSolutionC();
+
+        A a = null;
+        // CommonService ClassLoader Common #0
+        // A.class ClassLoader 1 #1
+        // A.class ClassLoader 2 #2
+        // ClassCastException A is not A
+        // Spring Boot Devtools
     }
 
-    @EnableStatemachine
+    private static void executeSolutionC() {
+        AnnotationConfigApplicationContext applicationContext =
+                new AnnotationConfigApplicationContext(
+                        TestConfiguration.class,
+                        OnActionEventListenerFactory.class,
+                        EventBasedStateMachine.class);
+
+        StateMachine machine = applicationContext.getBean(StateMachine.class);
+
+        machine.fire("xx", "wangwu");
+    }
+
+    // @EnableStatemachine
     @Configuration(proxyBeanMethods = false)
     @ComponentScan("com.vincentzheng.test03")
     private static class TestConfiguration {
@@ -35,6 +65,10 @@ public class TestA {
 
         private B b;
 
+        /**
+         * A(Bean) -> doExecute ->  @OnAction(onEvent = @OnEvent("xx"))
+         * "xx" -> A(Bean) -> A(Bean) + Method = Java Reflection -> method.invoke(beanObject,name)
+         */
         @OnAction(onEvent = @OnEvent("xx"))
         public void doExecute(String name) {
             System.out.println("B: " + b);

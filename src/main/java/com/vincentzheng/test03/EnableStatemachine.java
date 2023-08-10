@@ -17,7 +17,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Configuration(proxyBeanMethods = false)
-@Import(StatemachineBeanDefinitionRegistrar.class)
+//@Import(StatemachineBeanDefinitionRegistrar.class)
+@Import(StatemachineBeanDefinitionRegistrar2.class)
 public @interface EnableStatemachine {
 
 }

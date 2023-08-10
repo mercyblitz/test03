@@ -14,8 +14,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -35,7 +33,10 @@ public class StatemachineBeanDefinitionRegistrar implements ImportBeanDefinition
         }
         final ListableBeanFactory beanFactory = (ListableBeanFactory) registry;
 
+        // 提早初始化
+        // BeanFactory BeanProcessor = ApplicationContextAwareProcessor + ApplicationListenerDetector
         final Map<String, Object> matchBeans = beanFactory.getBeansWithAnnotation(WithStateMachine.class);
+        // testA.A -> BeanFactory.singletonObjects -> "testA.A" - A@123123213
         if (CollectionUtils.isEmpty(matchBeans)) {
             return;
         }
